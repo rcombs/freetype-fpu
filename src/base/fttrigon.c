@@ -30,6 +30,7 @@
   /*************************************************************************/
 
 #include <ft2build.h>
+#include <math.h>
 #include FT_INTERNAL_OBJECTS_H
 #include FT_INTERNAL_CALC_H
 #include FT_TRIGONOMETRY_H
@@ -296,6 +297,7 @@
   FT_EXPORT_DEF( FT_Fixed )
   FT_Cos( FT_Angle  angle )
   {
+    return cosf(angle/65536.0*(M_PI/180.0)) * 65536.0;
     FT_Vector  v;
 
 
@@ -339,6 +341,7 @@
   FT_Atan2( FT_Fixed  dx,
             FT_Fixed  dy )
   {
+    return atan2f(dy/65536.0, dx/65536.0) * (180.0 / M_PI) * 65536;
     FT_Vector  v;
 
 
