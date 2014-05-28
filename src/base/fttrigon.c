@@ -298,12 +298,6 @@
   FT_Cos( FT_Angle  angle )
   {
     return cosf(angle/65536.0*(M_PI/180.0)) * 65536.0;
-    FT_Vector  v;
-
-
-    FT_Vector_Unit( &v, angle );
-
-    return v.x;
   }
 
 
@@ -312,12 +306,7 @@
   FT_EXPORT_DEF( FT_Fixed )
   FT_Sin( FT_Angle  angle )
   {
-    FT_Vector  v;
-
-
-    FT_Vector_Unit( &v, angle );
-
-    return v.y;
+    return sinf(angle/65536.0*(M_PI/180.0)) * 65536.0;
   }
 
 
@@ -326,12 +315,7 @@
   FT_EXPORT_DEF( FT_Fixed )
   FT_Tan( FT_Angle  angle )
   {
-    FT_Vector  v;
-
-
-    FT_Vector_Unit( &v, angle );
-
-    return FT_DivFix( v.y, v.x );
+    return tanf(angle/65536.0*(M_PI/180.0)) * 65536.0;
   }
 
 
@@ -342,18 +326,6 @@
             FT_Fixed  dy )
   {
     return atan2f(dy/65536.0, dx/65536.0) * (180.0 / M_PI) * 65536;
-    FT_Vector  v;
-
-
-    if ( dx == 0 && dy == 0 )
-      return 0;
-
-    v.x = dx;
-    v.y = dy;
-    ft_trig_prenorm( &v );
-    ft_trig_pseudo_polarize( &v );
-
-    return v.y;
   }
 
 
@@ -388,36 +360,21 @@
   FT_Vector_Rotate( FT_Vector*  vec,
                     FT_Angle    angle )
   {
-    FT_Int     shift;
     FT_Vector  v;
 
+    v.x   = vec->x;
+    v.y   = vec->y;
 
-    if ( !vec || !angle )
-      return;
-
-    v = *vec;
-
-    if ( v.x == 0 && v.y == 0 )
-      return;
-
-    shift = ft_trig_prenorm( &v );
-    ft_trig_pseudo_rotate( &v, angle );
-    v.x = ft_trig_downscale( v.x );
-    v.y = ft_trig_downscale( v.y );
-
-    if ( shift > 0 )
+    if ( angle && ( v.x != 0 || v.y != 0 ) )
     {
-      FT_Int32  half = (FT_Int32)1L << ( shift - 1 );
+      float ang = angle*(M_PI/180.0)/65536.0;
+      float c = cosf(ang);
+      float s = sinf(ang);
+      v.x = (c * vec->x) - (s * vec->y);
+      v.y = (s * vec->x) + (c * vec->y);
 
-
-      vec->x = ( v.x + half + FT_SIGN_LONG( v.x ) ) >> shift;
-      vec->y = ( v.y + half + FT_SIGN_LONG( v.y ) ) >> shift;
-    }
-    else
-    {
-      shift  = -shift;
-      vec->x = (FT_Pos)( (FT_ULong)v.x << shift );
-      vec->y = (FT_Pos)( (FT_ULong)v.y << shift );
+      vec->x = (FT_Pos)( (FT_ULong)v.x );
+      vec->y = (FT_Pos)( (FT_ULong)v.y );
     }
   }
 
