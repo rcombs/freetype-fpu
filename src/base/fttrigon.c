@@ -29,6 +29,8 @@
   /*                                                                       */
   /*************************************************************************/
 
+#define _GNU_SOURCE 1
+
 #include <ft2build.h>
 #include <math.h>
 #include FT_INTERNAL_OBJECTS_H
