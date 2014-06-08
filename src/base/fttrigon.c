@@ -327,6 +327,8 @@
   FT_Atan2( FT_Fixed  dx,
             FT_Fixed  dy )
   {
+    if ( dy == 0 && dx == 0 )
+      return 0;
     return atan2f(dy/65536.0, dx/65536.0) * (180.0 / M_PI) * 65536;
   }
 
@@ -362,21 +364,13 @@
   FT_Vector_Rotate( FT_Vector*  vec,
                     FT_Angle    angle )
   {
-    FT_Vector  v;
-
-    v.x   = vec->x;
-    v.y   = vec->y;
-
-    if ( angle && ( v.x != 0 || v.y != 0 ) )
+    if ( angle && ( vec->x != 0 || vec->y != 0 ) )
     {
       float ang = angle*(M_PI/180.0)/65536.0;
-      float c = cosf(ang);
-      float s = sinf(ang);
-      v.x = (c * vec->x) - (s * vec->y);
-      v.y = (s * vec->x) + (c * vec->y);
-
-      vec->x = (FT_Pos)( (FT_ULong)v.x );
-      vec->y = (FT_Pos)( (FT_ULong)v.y );
+      float c = cosf(ang), s = sinf(ang);
+      FT_Pos x = (c * vec->x) - (s * vec->y);
+      vec->y = (s * vec->x) + (c * vec->y);
+      vec->x = x;
     }
   }
 
